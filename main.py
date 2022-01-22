@@ -2,6 +2,14 @@ import pygame
 import os
 
 
+def text(text, x, y):
+    font = pygame.font.Font(None, 50)
+    logo = font.render(text, True, pygame.Color('gold'))
+    print(logo.get_width())
+    print(logo.get_height())
+    screen.blit(logo, (x, y))
+
+
 def load_image(name):
     fullname = os.path.join('data', name)
     try:
@@ -123,9 +131,10 @@ class Hero(pygame.sprite.Sprite):
         global Idle
         self.Idle = not self.Idle
         Idle = self.Idle
-    
+
     def get_idle(self):
         return self.Idle
+
 
 class Doska_V(pygame.sprite.Sprite):
     image = load_image("doska_v.png")
@@ -151,6 +160,7 @@ class Doska_G(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
+
 pygame.init()
 
 x = 40
@@ -164,7 +174,7 @@ screen_size = (800, 400)
 screen = pygame.display.set_mode(screen_size)
 screen.fill((16, 74, 16))
 
-speed = 500
+speed = 100
 FPS = 30
 clock = pygame.time.Clock()
 walker = pygame.time.Clock()
@@ -182,30 +192,42 @@ figurs = Figur(70, 50)
 colors = Color(300, 50)
 numbers = Num(530, 50)
 
-
 runing = True
+flag = True
 while runing:
     screen.fill((16, 74, 16))
-    player = Hero(x, y, cur_frame, Idle)
-    
+
     # get all events from the queue
     for event in pygame.event.get():
         # loop events queue
         if event.type == pygame.QUIT:
             runing = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            player.walk_idle()
-            stoping_x = event.pos[0]
-
+            if player.get_idle():
+                player.walk_idle()
+                if 100 < event.pos[0] < 234 and 200 < event.pos[1] < 235:
+                    stoping_x = 140
+                    flag = True
+                elif 350 < event.pos[0] < 451 and 270 < event.pos[1] < 304:
+                    stoping_x = 390
+                    flag = True
+                elif 560 < event.pos[0] < 691 and 200 < event.pos[1] < 235:
+                    stoping_x = 600
+                    flag = True
+    player = Hero(x, y, cur_frame, Idle)
+    text('Фигуры', 100, 200)
+    text('Цвета', 350, 270)
+    text('Цифры', 560, 200)
     all_sprites.update()
     all_sprites.draw(screen)
     horizontal_borders.draw(screen)
     vertical_borders.draw(screen)
-    
-    if not player.get_idle():
+
+    if x < stoping_x and not player.get_idle():
         x += speed / FPS
-    elif x == stoping_x:
+    elif x >= stoping_x and flag:
         player.walk_idle()
+        flag = False
     if x > 765:
         x = 45
 
