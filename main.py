@@ -5,6 +5,11 @@ import os
 def text(text, x, y):
     font = pygame.font.Font(None, 50)
     logo = font.render(text, True, pygame.Color('gold'))
+<<<<<<< HEAD
+=======
+    print(logo.get_width())
+    print(logo.get_height())
+>>>>>>> 7ee72073ea74b3e4a857a4464ed21a84099b471b
     screen.blit(logo, (x, y))
 
 
@@ -292,7 +297,11 @@ screen_size = (800, 400)
 screen = pygame.display.set_mode(screen_size)
 screen.fill((16, 74, 16))
 
+<<<<<<< HEAD
 speed = 150
+=======
+speed = 100
+>>>>>>> 7ee72073ea74b3e4a857a4464ed21a84099b471b
 FPS = 30
 clock = pygame.time.Clock()
 walker = pygame.time.Clock()
@@ -316,6 +325,7 @@ figurs = Figur(70, 50)
 colors = Color(300, 50)
 numbers = Num(530, 50)
 
+<<<<<<< HEAD
 circle = Circle(75, 75)
 trinagle = Trinagle(290, 75)
 square = Square(540, 75)
@@ -330,15 +340,22 @@ three = Three(500, 75)
 
 exit = Exit_btn(50, 40)
 
+=======
+>>>>>>> 7ee72073ea74b3e4a857a4464ed21a84099b471b
 runing = True
 flag = True
 while runing:
     screen.fill((16, 74, 16))
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7ee72073ea74b3e4a857a4464ed21a84099b471b
     # get all events from the queue
     for event in pygame.event.get():
         # loop events queue
         if event.type == pygame.QUIT:
             runing = False
+<<<<<<< HEAD
         if page == 1: 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if player.get_idle() or x in (140, 390, 600):
@@ -403,6 +420,36 @@ while runing:
     
     horizontal_borders.draw(screen)
     vertical_borders.draw(screen)
+=======
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if player.get_idle():
+                player.walk_idle()
+                if 100 < event.pos[0] < 234 and 200 < event.pos[1] < 235:
+                    stoping_x = 140
+                    flag = True
+                elif 350 < event.pos[0] < 451 and 270 < event.pos[1] < 304:
+                    stoping_x = 390
+                    flag = True
+                elif 560 < event.pos[0] < 691 and 200 < event.pos[1] < 235:
+                    stoping_x = 600
+                    flag = True
+    player = Hero(x, y, cur_frame, Idle)
+    text('Фигуры', 100, 200)
+    text('Цвета', 350, 270)
+    text('Цифры', 560, 200)
+    all_sprites.update()
+    all_sprites.draw(screen)
+    horizontal_borders.draw(screen)
+    vertical_borders.draw(screen)
+
+    if x < stoping_x and not player.get_idle():
+        x += speed / FPS
+    elif x >= stoping_x and flag:
+        player.walk_idle()
+        flag = False
+    if x > 765:
+        x = 45
+>>>>>>> 7ee72073ea74b3e4a857a4464ed21a84099b471b
 
     clock.tick(FPS)
 
