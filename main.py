@@ -1,3 +1,4 @@
+import sqlite3
 import pygame
 import os
 
@@ -278,11 +279,50 @@ class Doska_G(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
+def terminate():
+    import sys
+    pygame.quit()
+    sys.exit()
+
+def start_screen():
+    intro_text = ['','',"                                              Razvivaika",
+                  "         Это развивающая детская игра для самых маленьких",
+                  "                                           И да это 50cent"]
+
+    fon = pygame.transform.scale(load_image('fon.png'), (800, 400))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 35)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('gold'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                return  # начинаем игру
+        pygame.display.flip()
+        clock.tick(FPS)
 
 pygame.init()
 
 x = 40
 y = 315
+
+pygame.mixer.music.load('data\in da club.mp3')
+pygame.mixer.music.play(-1)
+pygame.mixer.music.set_volume(0.1)
+
+pygame.display.set_caption("Razvivaika")
+pygame.display.set_icon(pygame.image.load('data\icon.png'))
 
 cur_frame = 0
 Idle = True
@@ -293,15 +333,19 @@ screen = pygame.display.set_mode(screen_size)
 screen.fill((16, 74, 16))
 
 speed = 150
-FPS = 30
+FPS = 24
 clock = pygame.time.Clock()
 walker = pygame.time.Clock()
+start_screen()
 
 page_one = pygame.sprite.Group()
 page_two = pygame.sprite.Group()
 page_three = pygame.sprite.Group()
 page_four = pygame.sprite.Group()
+page_five = pygame.sprite.Group()
+
 buttons = pygame.sprite.Group()
+
 horizontal_borders = pygame.sprite.Group()
 vertical_borders = pygame.sprite.Group()
 
@@ -310,7 +354,8 @@ doska_v_2 = Doska_V(765, 35)
 doska_g_1 = Doska_G(0, 0)
 doska_g_2 = Doska_G(0, 365)
 
-page = 4
+page = 1
+test = 1
 
 figurs = Figur(70, 50)
 colors = Color(300, 50)
@@ -329,6 +374,8 @@ two = Two(350, 75)
 three = Three(500, 75)
 
 exit = Exit_btn(50, 40)
+
+result = 0
 
 runing = True
 flag = True
@@ -352,17 +399,59 @@ while runing:
                     elif 560 < event.pos[0] < 691 and 200 < event.pos[1] < 235:
                         stoping_x = 600
                         flag = True
-        if page in (2, 3, 4):
+                    elif 650 < event.pos[0] < 724 and 315 < event.pos[1] < 349:
+                        stoping_x = 690
+                        flag = True
+        if page in (2, 3, 4, 5):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if 50 < event.pos[0] < 114 and 40 < event.pos[1] < 72:
+                    
+                    test = 1
+                    if page == 5:
+                        con = sqlite3.connect('data\datebase.sqlite')
+                        cur = con.cursor()
+                        cur.execute(f"""INSERT INTO results(result) VALUES({result})""").fetchall()
+                        con.commit()
                     page = 1
-        
+                    result = 0
+        if page == 5:
+            if test == 1:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if 290 < event.pos[0] < 490 and 75 < event.pos[1] < 300:
+                        result += 1
+                        test = 2
+                    if 75 < event.pos[0] < 267 and 75 < event.pos[1] < 267:
+                        test = 2
+                    if 540 < event.pos[0] < 743 and 75 < event.pos[1] < 278:
+                        test = 2
+                    continue
+            if test == 2:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if 50 < event.pos[0] < 250 and 75 < event.pos[1] < 275:
+                        result += 1
+                        test = 3
+                    elif 300 < event.pos[0] < 500 and 75 < event.pos[1] < 275:
+                        test = 3
+                    elif 550 < event.pos[0] < 750 and 75 < event.pos[1] < 275:
+                        test = 3
+                    continue
+            if test == 3:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if 500 < event.pos[0] < 666 and 75 < event.pos[1] < 256:
+                        result += 1
+                        test = 4
+                    elif 350 < event.pos[0] < 460 and 75 < event.pos[1] < 270:
+                        test = 4
+                    elif 100 < event.pos[0] < 255 and 75 < event.pos[1] < 311:
+                        test = 4
+                    continue
 
     if page == 1:
         player = Hero(x, y, cur_frame, Idle)
         text('Фигуры', 100, 200)
         text('Цвета', 350, 270)
         text('Цифры', 560, 200)
+        text('Тест', 650, 315)
         page_one.update()
         page_one.draw(screen)
 
@@ -377,10 +466,9 @@ while runing:
                 page = 3
             if stoping_x == 600:
                 page = 4
+            if stoping_x == 690:
+                page = 5
             x = 45
-        if x > 765:
-            x = 45
-
         page_one.remove(player)
     if page == 2:
         buttons.draw(screen)
@@ -400,7 +488,23 @@ while runing:
         text('Это один', 75, 300)
         text('Это два', 325, 300)
         text('Это три', 550, 300)
-    
+    if page == 5:
+        buttons.draw(screen)
+        if test == 1:
+            print(test)
+            page_two.draw(screen)
+            text('Выбери треугольник', 200, 300)
+        if test == 2:
+            print(test)
+            page_three.draw(screen)
+            text('Выбери синий цвет', 200, 300)
+        if test == 3:
+            page_four.draw(screen)
+            text('Выбери число три', 200, 300)
+        if test == 4:
+            text(f'Вы ответили на:{result} вопроса правильно', 100, 150)
+            
+
     horizontal_borders.draw(screen)
     vertical_borders.draw(screen)
 
